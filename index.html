@@ -174,23 +174,12 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <a id="more"></a>
-<p>参考各家搭建博客的心得，千呼万唤使出来，搭好了自己的博客，简单记录一下使用hexo+github搭建的过程。hexo是一个基于Node.js的静态博客框架，我们的博客在本地生成，然后托管到github上。每次编辑markdown格式的博文，然后发布文章。<br>参考<a href="https://zhuanlan.zhihu.com/p/26625249" target="_blank" rel="noopener">GitHub+Hexo 搭建个人网站详细教程</a></p>
-<h1 id="一-准备"><a href="#一-准备" class="headerlink" title="一.准备"></a>一.准备</h1><ol>
-<li>进入github，创建新的repository，注意repo的名字必须为github的用户名+github.io，比如我的upsuperman.github.io。</li>
-<li>安装git，进行本地与github的非对称加密。</li>
-<li>安装node.js</li>
-<li>安装hexo，hexo常用命令为：<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hexo init blog #创建博客目录</span><br><span class="line">hexo new file #新建博文</span><br><span class="line">hexo generate #生成</span><br><span class="line">hexo deploy #部署</span><br><span class="line">hexo clean #清除缓存</span><br><span class="line">hexo<span class="built_in"> server </span>#启动本地server预览</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<h1 id="二-推送网站"><a href="#二-推送网站" class="headerlink" title="二. 推送网站"></a>二. 推送网站</h1><p>在创建的博客根目录blog/_config.yml文件中，对最后deplo部分进行修改：<br><figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">deploy:</span></span><br><span class="line"><span class="string">type:</span> git </span><br><span class="line"><span class="string">repo:</span> <span class="string">https:</span><span class="comment">//github.com/upsuperman/upsuperman.github.io.git</span></span><br><span class="line"><span class="string">branch:</span> master</span><br></pre></td></tr></table></figure></p>
-<p>保存配置，运行<code>hexo clean &amp;&amp; hexo g &amp;&amp; hexo d</code>将网站推送到github</p>
-<h1 id="三-更换主题"><a href="#三-更换主题" class="headerlink" title="三. 更换主题"></a>三. 更换主题</h1><p>本次使用<a href="https://github.com/litten/hexo-theme-yilia" target="_blank" rel="noopener">yilia主题</a>, 主要修改blog/_config.yml配置文件和blog/theam/_config.yml主题配置文件，关于模块更改参考<a href="https://www.liuyun.fun/2018/04/07/Hexo_yilia_%E4%B8%BB%E9%A2%98%E4%B8%80%E6%8F%BD%E5%AD%90%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88/" target="_blank" rel="noopener">hexo yilia主题使用方案</a></p>
-
+        <p>参考各家搭建博客的心得，千呼万唤使出来，搭好了自己的博客，简单记录一下使用hexo+github搭建的过程。hexo是一个基于Node.js的静态博客框架，我们的博客在本地生成，然后托管到github上。每次编辑markdown格式的博文，然后发布文章。
+        
       
 
       
-    </div>
+    </p></div>
     <div class="article-info article-info-index">
       
       
@@ -210,94 +199,6 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2019/03/17/hexo+github搭建博客/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'ec9e99f4c3cc86646ec3',
-  	clientSecret: 'ae9783919bd2a85feb143152dd8717ce87270b6c',
-  	repo: 'upsuperman.github.io',
-  	owner: 'upsuperman',
-  	admin: ['upsuperman'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
-    <article id="post-test-file" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/03/17/test-file/">test_file</a>
-    </h1>
-  
-
-		<!--显示阅读次数-->
-		
-        
-        <a href="/2019/03/17/test-file/" class="archive-article-date">
-  	<time datetime="2019-03-17T02:53:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-03-17</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ul>
-<li>test file</li>
-</ul>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/03/17/test-file/">展开全文 >></a>
         </p>
       
 

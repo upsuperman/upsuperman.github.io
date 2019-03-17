@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="https://upsuperman.github.io">
   <title>hexo+github搭建博客 | upsuperman</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="参考各家搭建博客的心得，千呼万唤使出来，搭好了自己的博客，简单记录一下使用hexo+github搭建的过程。hexo是一个基于Node.js的静态博客框架，我们的博客在本地生成，然后托管到github上。每次编辑markdown格式的博文，然后发布文章。参考GitHub+Hexo 搭建个人网站详细教程 一.准备 进入github，创建新的repository，注意repo的名字必须为github">
+  <meta name="description" content="参考各家搭建博客的心得，千呼万唤使出来，搭好了自己的博客，简单记录一下使用hexo+github搭建的过程。hexo是一个基于Node.js的静态博客框架，我们的博客在本地生成，然后托管到github上。每次编辑markdown格式的博文，然后发布文章。">
 <meta name="keywords" content="环境搭建">
 <meta property="og:type" content="article">
 <meta property="og:title" content="hexo+github搭建博客">
 <meta property="og:url" content="https://upsuperman.github.io/2019/03/17/hexo+github搭建博客/index.html">
 <meta property="og:site_name" content="upsuperman">
-<meta property="og:description" content="参考各家搭建博客的心得，千呼万唤使出来，搭好了自己的博客，简单记录一下使用hexo+github搭建的过程。hexo是一个基于Node.js的静态博客框架，我们的博客在本地生成，然后托管到github上。每次编辑markdown格式的博文，然后发布文章。参考GitHub+Hexo 搭建个人网站详细教程 一.准备 进入github，创建新的repository，注意repo的名字必须为github">
+<meta property="og:description" content="参考各家搭建博客的心得，千呼万唤使出来，搭好了自己的博客，简单记录一下使用hexo+github搭建的过程。hexo是一个基于Node.js的静态博客框架，我们的博客在本地生成，然后托管到github上。每次编辑markdown格式的博文，然后发布文章。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-03-17T10:15:09.474Z">
+<meta property="og:updated_time" content="2019-03-17T10:23:09.414Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="hexo+github搭建博客">
-<meta name="twitter:description" content="参考各家搭建博客的心得，千呼万唤使出来，搭好了自己的博客，简单记录一下使用hexo+github搭建的过程。hexo是一个基于Node.js的静态博客框架，我们的博客在本地生成，然后托管到github上。每次编辑markdown格式的博文，然后发布文章。参考GitHub+Hexo 搭建个人网站详细教程 一.准备 进入github，创建新的repository，注意repo的名字必须为github">
+<meta name="twitter:description" content="参考各家搭建博客的心得，千呼万唤使出来，搭好了自己的博客，简单记录一下使用hexo+github搭建的过程。hexo是一个基于Node.js的静态博客框架，我们的博客在本地生成，然后托管到github上。每次编辑markdown格式的博文，然后发布文章。">
   
     <link rel="alternative" href="/atom.xml" title="upsuperman" type="application/atom+xml">
   
@@ -181,8 +181,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <a id="more"></a>
-<p>参考各家搭建博客的心得，千呼万唤使出来，搭好了自己的博客，简单记录一下使用hexo+github搭建的过程。hexo是一个基于Node.js的静态博客框架，我们的博客在本地生成，然后托管到github上。每次编辑markdown格式的博文，然后发布文章。<br>参考<a href="https://zhuanlan.zhihu.com/p/26625249" target="_blank" rel="noopener">GitHub+Hexo 搭建个人网站详细教程</a></p>
+        <p>参考各家搭建博客的心得，千呼万唤使出来，搭好了自己的博客，简单记录一下使用hexo+github搭建的过程。hexo是一个基于Node.js的静态博客框架，我们的博客在本地生成，然后托管到github上。每次编辑markdown格式的博文，然后发布文章。 <a id="more"></a><br>参考<a href="https://zhuanlan.zhihu.com/p/26625249" target="_blank" rel="noopener">GitHub+Hexo 搭建个人网站详细教程</a></p>
 <h1 id="一-准备"><a href="#一-准备" class="headerlink" title="一.准备"></a>一.准备</h1><ol>
 <li>进入github，创建新的repository，注意repo的名字必须为github的用户名+github.io，比如我的upsuperman.github.io。</li>
 <li>安装git，进行本地与github的非对称加密。</li>
@@ -193,6 +192,7 @@
 <h1 id="二-推送网站"><a href="#二-推送网站" class="headerlink" title="二. 推送网站"></a>二. 推送网站</h1><p>在创建的博客根目录blog/_config.yml文件中，对最后deplo部分进行修改：<br><figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">deploy:</span></span><br><span class="line"><span class="string">type:</span> git </span><br><span class="line"><span class="string">repo:</span> <span class="string">https:</span><span class="comment">//github.com/upsuperman/upsuperman.github.io.git</span></span><br><span class="line"><span class="string">branch:</span> master</span><br></pre></td></tr></table></figure></p>
 <p>保存配置，运行<code>hexo clean &amp;&amp; hexo g &amp;&amp; hexo d</code>将网站推送到github</p>
 <h1 id="三-更换主题"><a href="#三-更换主题" class="headerlink" title="三. 更换主题"></a>三. 更换主题</h1><p>本次使用<a href="https://github.com/litten/hexo-theme-yilia" target="_blank" rel="noopener">yilia主题</a>, 主要修改blog/_config.yml配置文件和blog/theam/_config.yml主题配置文件，关于模块更改参考<a href="https://www.liuyun.fun/2018/04/07/Hexo_yilia_%E4%B8%BB%E9%A2%98%E4%B8%80%E6%8F%BD%E5%AD%90%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88/" target="_blank" rel="noopener">hexo yilia主题使用方案</a></p>
+<h1 id="四-发布文章"><a href="#四-发布文章" class="headerlink" title="四. 发布文章"></a>四. 发布文章</h1><p>使用<code>hexo new &quot;文章&quot;</code>新建文章，然后按照<a href="https://markdown-zh.readthedocs.io/en/latest/" target="_blank" rel="noopener">markdown语法</a>编辑，需要显示部分内容，在正文想显示的部分加入<code>&lt;!-- more --&gt;</code>。</p>
 
       
 
@@ -295,16 +295,6 @@
 </article>
 
   
-<nav id="article-nav">
-  
-  
-    <a href="/2019/03/17/test-file/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">test_file</div>
-      <i class="icon-circle-right"></i>
-    </a>
-  
-</nav>
-
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -326,7 +316,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一-准备"><span class="toc-number">1.</span> <span class="toc-text">一.准备</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二-推送网站"><span class="toc-number">2.</span> <span class="toc-text">二. 推送网站</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#三-更换主题"><span class="toc-number">3.</span> <span class="toc-text">三. 更换主题</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一-准备"><span class="toc-number">1.</span> <span class="toc-text">一.准备</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二-推送网站"><span class="toc-number">2.</span> <span class="toc-text">二. 推送网站</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#三-更换主题"><span class="toc-number">3.</span> <span class="toc-text">三. 更换主题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#四-发布文章"><span class="toc-number">4.</span> <span class="toc-text">四. 发布文章</span></a></li></ol>
                     </div>
                 </span>
             </div>
