@@ -316,6 +316,22 @@
   
 
   
+  <div id="gitment-ctn"></div> 
+<link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+<script src="//imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  id: "https://upsuperman.github.io/2019/03/17/test-file/",
+  owner: 'upsuperman',
+  repo: 'seayun',
+  oauth: {
+    client_id: 'ec9e99f4c3cc86646ec3',
+    client_secret: 'ae9783919bd2a85feb143152dd8717ce87270b6c',
+  },
+})
+gitment.render('gitment-ctn')
+</script>
+  
 
 
           </div>
