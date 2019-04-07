@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="分布式系统,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="upsuperman" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="目前分布式架构越来越成为主流系统的设计方式，cap理论作为分布式系统的基本原理之一是最基本的，也是极其重要的部分。下面将对cap理论进行简要阐述，包含理论基本概念、证明cap定理以及如何权衡cap以满足所设计的系统。">
+<meta name="keywords" content="分布式系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈分布式系统的CAP理论">
+<meta property="og:url" content="http://yoursite.com/2019/04/05/浅谈分布式系统的CAP理论/index.html">
+<meta property="og:site_name" content="upsuperman">
+<meta property="og:description" content="目前分布式架构越来越成为主流系统的设计方式，cap理论作为分布式系统的基本原理之一是最基本的，也是极其重要的部分。下面将对cap理论进行简要阐述，包含理论基本概念、证明cap定理以及如何权衡cap以满足所设计的系统。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/2019/04/05/浅谈分布式系统的CAP理论/cap.jpg">
+<meta property="og:updated_time" content="2019-04-07T11:57:44.695Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅谈分布式系统的CAP理论">
+<meta name="twitter:description" content="目前分布式架构越来越成为主流系统的设计方式，cap理论作为分布式系统的基本原理之一是最基本的，也是极其重要的部分。下面将对cap理论进行简要阐述，包含理论基本概念、证明cap定理以及如何权衡cap以满足所设计的系统。">
+<meta name="twitter:image" content="http://yoursite.com/2019/04/05/浅谈分布式系统的CAP理论/cap.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'upsuperman'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/04/05/浅谈分布式系统的CAP理论/">
+
+
+
+
+
+  <title>浅谈分布式系统的CAP理论 | upsuperman</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">upsuperman</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一蓑烟雨任平生</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/05/浅谈分布式系统的CAP理论/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Up">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="upsuperman">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浅谈分布式系统的CAP理论</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-04-05T21:19:54+08:00">
+                2019-04-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  2.1k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  7
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>目前分布式架构越来越成为主流系统的设计方式，cap理论作为分布式系统的基本原理之一是最基本的，也是极其重要的部分。下面将对cap理论进行简要阐述，包含理论基本概念、证明cap定理以及如何权衡cap以满足所设计的系统。<a id="more"></a></p>
+<h1 id="一-CAP理论基本概念"><a href="#一-CAP理论基本概念" class="headerlink" title="一. CAP理论基本概念"></a>一. CAP理论基本概念</h1><p>CAP定理指出对于一个分布式计算系统来说，不可能同时满足下述三点：<br><img src="/2019/04/05/浅谈分布式系统的CAP理论/cap.jpg" alt="cap"></p>
+<h2 id="1-一致性（Consistency）"><a href="#1-一致性（Consistency）" class="headerlink" title="1. 一致性（Consistency）"></a>1. 一致性（Consistency）</h2><ul>
+<li>原始定义：“A read is guaranteed to return the most recent write for a given client”<br>所有节点在同一时间访问同一份最新的数据，即论文中“all nodes see the same data at the same time”。</li>
+<li>从客户端和服务端的角度看待一致性，主要是指client并发访问更新过的数据怎样来获取，同时服务端的更新操作怎么复制分布到整个系统，来保证数据的最终一致。当更新操作成功并返回客户端时，系统的所有节点在同一时间的数据要完全一致。<br>三种一致性策略：<ul>
+<li>强一致性：如关系型数据库，当系统中更新操作完成，任何多个进程或线程访问系统都能获得最新的值。</li>
+<li>弱一致性：是指系统并不保证后续进程或线程的访问都会返回最新的更新的值。系统在数据成功吸入之后，不承诺立即可以读到最新写入的值，也不会具体承诺多久读到。但是会尽可能保证在某个时间级别（秒级）之后。可以让数据达到一致性状态。也就是说，如果能容忍后续的部分或者全部访问不到，则是弱一致性。</li>
+<li>最终一致性：是弱一致性的特定形式。系统保证在没有后续更新的前提下，系统最终返回上一次更新操作的值。 也就是说，如果经过一段时间后要求能访问到更新后的数据，则是最终一致性。</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-可用性（Availability）"><a href="#2-可用性（Availability）" class="headerlink" title="2. 可用性（Availability）"></a>2. 可用性（Availability）</h2><ul>
+<li>“A non-failing node will return a reasonable response within a reasonable amount of time(no error or timeout)”</li>
+<li>“Reads and writes always succeed”。每次请求都能得到非错的响应，读写永远成功，但是不保证获取的数据为最新数据。<br>对分布式系统而言，每个非故障的节点都要对每个请求做出响应，衡量系统额可用性即通过停机时间来计算：<br>通常我们描述一个说某系统可用性可以达到5个9，意思就是说他的可用水平是99.999%，即全年停机时间不超过 (1-0.99999)<em>365</em>24*60 = 5.256 min。</li>
+</ul>
+<h2 id="3-分区容错性（Partition-tolerance）"><a href="#3-分区容错性（Partition-tolerance）" class="headerlink" title="3. 分区容错性（Partition tolerance）"></a>3. 分区容错性（Partition tolerance）</h2><p> “The system will continue to function when network partitions occur”。<br> 分布式系统的每个子网叫一个区（partition），分区容错即为区间通信可能失败，当网络故障时仍能对外提供满足要求的服务。其中P包含网络分区，网络丢包，节点宕机，其他节点发往宕机节点的包也会丢失等情况。</p>
+<h1 id="二-CAP理论证明和高可用HA"><a href="#二-CAP理论证明和高可用HA" class="headerlink" title="二. CAP理论证明和高可用HA"></a>二. CAP理论证明和高可用HA</h1><p> 2002年，Lynch等人证明了Brewer的猜想，证明相对比较简单，采用反证法，即三者同时满足，则因为允许P的存在，一定会在server之间存在网络丢包，进而一致性就不能保证。 </p>
+<h2 id="CAP的A和高可用HA"><a href="#CAP的A和高可用HA" class="headerlink" title="CAP的A和高可用HA"></a>CAP的A和高可用HA</h2><p> CAP中的A要求任何一个未发生故障的节点必须在有限时间内返回结果，但是如果节点发生网络分区，某节点被剔除然后其他节点也能提供服务，这时故障发生时，只要恢复时间够短，高可用要求也是符合的，此时虽然未满足CAP的A的定义，但是系统的本质需求是满足的，CAP的A只是理论上的需求。作者也在2012年发表了<a href="http://xueshu.baidu.com/usercenter/paper/show?paperid=a907cc0043a28b986b5888c7f6cbe5f9&amp;site=xueshu_se" target="_blank" rel="noopener">CAP twelve years later: How the \”rules\” have changed</a>文章来描述这一变化。</p>
+<h1 id="三-分布式环境下的各种问题"><a href="#三-分布式环境下的各种问题" class="headerlink" title="三. 分布式环境下的各种问题"></a>三. 分布式环境下的各种问题</h1><p>分布式系统体系结构有诸多的难题和挑战：</p>
+<h2 id="1-通信异常"><a href="#1-通信异常" class="headerlink" title="1. 通信异常"></a>1. 通信异常</h2><p>分布式系统需要在各个节点之间进行网络通信，因此每次网络通信都会伴随着网络不可用的风险，网络光纤、路由器或是DNS等硬件设备或是系统不可用都会导致最终分布式系统无法顺利完成一次网络通信。另外，即使分布式系统各个节点之间的网络通信能够正常进行，其延时也会大于单机操作，正常的一次网络通信的延迟在0.1~1ms左右（相当于内存访问延时的105倍）。</p>
+<h2 id="2-网络分区"><a href="#2-网络分区" class="headerlink" title="2.网络分区"></a>2.网络分区</h2><p>当网络由于发生异常情况，导致分布式系统中部分节点之间的网络延时不断增大，最终导致组成分布式系统的所有节点中，只有部分节点之间能够正常通信，而另一些节点则不能正常通信，我们将这个现象称为网络分区。当网络分区出现时，分布式系统会出现局部小集群，在极端情况下，这些局部小集群会独立完成原本需要整个分布式系统才能完成的功能。</p>
+<h2 id="3-节点故障"><a href="#3-节点故障" class="headerlink" title="3.节点故障"></a>3.节点故障</h2><p>节点故障则是分布式环境下另一个比较常见的问题，服务器节点出现的宕机或”僵死”现象。</p>
+<h2 id="4-跨机房部署问题"><a href="#4-跨机房部署问题" class="headerlink" title="4. 跨机房部署问题"></a>4. 跨机房部署问题</h2><p> 系统部署的跨机房问题分为两类：同城和异地。同城场景下网络延迟较低，主要是光纤传播时间+交换机的处理时间，单个数据中心故障能够很快恢复系统服务。而异地场景网络延时较大，通常可能超过100ms，因此地区故障时，一致性和可用性必须牺牲其一，若系统选择可用性，可能会丢失最后几秒的数据，若选择一致性，可能会导致系统长时间故障，对用户造成较大损失。实际的工业系统往往采用各种解决方案来使其系统更加健壮。</p>
+<h1 id="四-BASE定理"><a href="#四-BASE定理" class="headerlink" title="四. BASE定理"></a>四. BASE定理</h1><p>BASE定理是对CAP定理的延伸：即使无法做到强一致性（Strong Consistency），但应用可以采用适合的方式达到最终一致性（Eventual Consitency）。CAP中提到的一致性是强一致性，所谓“牺牲一致性”指牺牲强一致性保证弱一致性。<br>BASE是指基本可用（Basically Available）、软状态（ Soft State）、最终一致性（ Eventual Consistency）。</p>
+<h2 id="1-基本可用"><a href="#1-基本可用" class="headerlink" title="1.基本可用"></a>1.基本可用</h2><p>什么是基本可用呢？假设系统，出现了不可预知的故障，但还是能用，相比较正常的系统而言：<br>响应时间上的损失：正常情况下的搜索引擎0.5秒即返回给用户结果，而基本可用的搜索引擎可以在1秒作用返回结果。<br>功能上的损失：在一个电商网站上，正常情况下，用户可以顺利完成每一笔订单，但是到了大促期间，为了保护购物系统的稳定性，部分消费者可能会被引导到一个降级页面。</p>
+<h2 id="2-软状态"><a href="#2-软状态" class="headerlink" title="2.软状态"></a>2.软状态</h2><p>允许系统存在中间状态，而该中间状态不会影响系统整体可用性。<br>软状态本质上是一种弱一致性，允许的软状态不能违背“基本可用”的要求。如分布式存储中一般一份数据至少会有三个副本，允许不同节点间副本同步的延时（某些时刻副本数低于3）。</p>
+<h2 id="3-最终一致性"><a href="#3-最终一致性" class="headerlink" title="3.最终一致性"></a>3.最终一致性</h2><p>系统中的所有数据副本经过一定时间后，最终能够达到一致的状态。<br>软状态的终极目标是最终一致性。如，分布式存储的副本数最终会达到稳定状态。</p>
+<h1 id="五-总结"><a href="#五-总结" class="headerlink" title="五. 总结"></a>五. 总结</h1><p>CAP是分布式系统的基本原理，分布式系统如何权衡要结合实际系统和应用场景，要注意其三选二本身也是有前提条件成立的，不能简单误读，一切取决于实际应用。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/分布式系统/" rel="tag"># 分布式系统</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/17/hexo+github搭建博客/" rel="next" title="hexo+github搭建博客">
+                <i class="fa fa-chevron-left"></i> hexo+github搭建博客
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="Up">
+            
+              <p class="site-author-name" itemprop="name">Up</p>
+              <p class="site-description motion-element" itemprop="description">后端开发程序猿</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/upsuperman" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:526050496@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一-CAP理论基本概念"><span class="nav-number">1.</span> <span class="nav-text">一. CAP理论基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-一致性（Consistency）"><span class="nav-number">1.1.</span> <span class="nav-text">1. 一致性（Consistency）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-可用性（Availability）"><span class="nav-number">1.2.</span> <span class="nav-text">2. 可用性（Availability）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-分区容错性（Partition-tolerance）"><span class="nav-number">1.3.</span> <span class="nav-text">3. 分区容错性（Partition tolerance）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二-CAP理论证明和高可用HA"><span class="nav-number">2.</span> <span class="nav-text">二. CAP理论证明和高可用HA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CAP的A和高可用HA"><span class="nav-number">2.1.</span> <span class="nav-text">CAP的A和高可用HA</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三-分布式环境下的各种问题"><span class="nav-number">3.</span> <span class="nav-text">三. 分布式环境下的各种问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-通信异常"><span class="nav-number">3.1.</span> <span class="nav-text">1. 通信异常</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-网络分区"><span class="nav-number">3.2.</span> <span class="nav-text">2.网络分区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-节点故障"><span class="nav-number">3.3.</span> <span class="nav-text">3.节点故障</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-跨机房部署问题"><span class="nav-number">3.4.</span> <span class="nav-text">4. 跨机房部署问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四-BASE定理"><span class="nav-number">4.</span> <span class="nav-text">四. BASE定理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-基本可用"><span class="nav-number">4.1.</span> <span class="nav-text">1.基本可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-软状态"><span class="nav-number">4.2.</span> <span class="nav-text">2.软状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-最终一致性"><span class="nav-number">4.3.</span> <span class="nav-text">3.最终一致性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五-总结"><span class="nav-number">5.</span> <span class="nav-text">五. 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Up</span>
+
+
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">2.7k</span>
+  
+</div>
+
+
+
+<!--	
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+-->
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
