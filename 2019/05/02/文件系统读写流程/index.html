@@ -93,7 +93,7 @@
 <meta property="og:image" content="http://yoursite.com/2019/05/02/文件系统读写流程/1.png">
 <meta property="og:image" content="http://yoursite.com/2019/05/02/文件系统读写流程/3.png">
 <meta property="og:image" content="http://yoursite.com/2019/05/02/文件系统读写流程/4.jpg">
-<meta property="og:updated_time" content="2019-05-03T12:40:26.457Z">
+<meta property="og:updated_time" content="2019-05-03T13:16:14.178Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="文件系统读写流程">
 <meta name="twitter:description" content="掌握文件系统的读写流程和具体涉及到的知识点是理解分布式文件系统的重要途径，下文将主要描述文件系统read/write的基本流程，并介绍其中涉及的一些关键角色。">
@@ -356,7 +356,7 @@
         <p>掌握文件系统的读写流程和具体涉及到的知识点是理解分布式文件系统的重要途径，下文将主要描述文件系统read/write的基本流程，并介绍其中涉及的一些关键角色。<a id="more"></a></p>
 <h1 id="一-基本概念"><a href="#一-基本概念" class="headerlink" title="一. 基本概念"></a>一. 基本概念</h1><h2 id="1-虚拟文件系统，-Virtual-file-system，VFS）"><a href="#1-虚拟文件系统，-Virtual-file-system，VFS）" class="headerlink" title="1. 虚拟文件系统，(Virtual file system，VFS）"></a>1. 虚拟文件系统，(Virtual file system，VFS）</h2><p>VFS是操作系统中文件系统虚拟层，定义了一个通用文件系统的接口层和适配层，一方面为用户进程提供了一组统一的访问文件，目录和其他对象的统一方法，另一方面又要和不同的底层文件系统进行适配。<br><img src="/2019/05/02/文件系统读写流程/2.png" alt="vfs"></p>
 <p>VFS主要有四个对象类型：<br>（1）superblock<br>（2）inode<br>（3）dentry<br>（4）file </p>
-<h3 id="Superblock"><a href="#Superblock" class="headerlink" title="Superblock"></a>Superblock</h3><p>超级块（spuerblock）对象由各自的文件系统实现，用来存储文件系统的信息。这是整个文件系统的第一块空间。包括整个文件系统的基本信息，如块大小，inode/block的总量、使用量、剩余量，指向空间 inode 和数据块的指针等相关信息。</p>
+<h3 id="Superblock"><a href="#Superblock" class="headerlink" title="Superblock"></a>Superblock</h3><p>超级块（superblock）对象由各自的文件系统实现，用来存储文件系统的信息。这是整个文件系统的第一块空间。包括整个文件系统的基本信息，如块大小，inode/block的总量、使用量、剩余量，指向空间 inode 和数据块的指针等相关信息。</p>
 <h3 id="inode"><a href="#inode" class="headerlink" title="inode"></a>inode</h3><p>inode块(文件索引节点) : 记录文件的属性。它是文件系统的最基本单元，是文件系统连接任何子目录、任何文件的桥梁。每个子目录和文件只有唯一的一个 inode 块。它包含了文件系统中文件的基本属性(文件的长度、创建及修改时间、权限、所属关系)、存放数据的位置等相关信息。在 Linux 下可以通过 “ls -li” 命令查看文件的 inode 信息。硬连接和源文件具有相同的inode。<br>inode具体包含以下内容：<br><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">文件的字节数</span><br><span class="line">文件拥有者的<span class="keyword">User</span> <span class="title">ID</span></span><br><span class="line">文件的<span class="keyword">Group</span> <span class="title">ID</span></span><br><span class="line">文件的读、写、执行权限</span><br><span class="line">文件的时间戳，共有三个：ctime指inode上一次变动的时间，mtime指文件内容上一次变动的时间，atime指文件上一次打开的时间。</span><br><span class="line">链接数，即有多少文件名指向这个inode</span><br><span class="line">文件数据block的位置</span><br></pre></td></tr></table></figure></p>
 <p>inode是内核文件对象的元数据，其不包括文件的数据和文件名等信息，只包含数据块的位置等信息，数据结构相对稳定，可以固定大小，进而可以实现将整个文件系统中的inode按照一定的组织方式来集中存储在inodTable中，文件系统加载时，可以方便查找。</p>
 <p>inode仅仅只是保存了文件对象的属性信息，并没有包含文件名，文件在文件系统的目录树中所处的位置信息。那么内核又是怎么管理文件系统的目录树呢？</p>
