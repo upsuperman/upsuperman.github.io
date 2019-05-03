@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="文件系统，read/write,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="upsuperman" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="掌握文件系统的读写流程和具体涉及到的知识点是理解分布式文件系统的重要途径，下文将主要描述文件系统read/write的基本流程，并介绍其中涉及的一些关键角色。">
+<meta name="keywords" content="文件系统，read&#x2F;write">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文件系统读写流程">
+<meta property="og:url" content="http://yoursite.com/2019/05/02/文件系统读写流程/index.html">
+<meta property="og:site_name" content="upsuperman">
+<meta property="og:description" content="掌握文件系统的读写流程和具体涉及到的知识点是理解分布式文件系统的重要途径，下文将主要描述文件系统read/write的基本流程，并介绍其中涉及的一些关键角色。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/2019/05/02/文件系统读写流程/2.png">
+<meta property="og:image" content="http://yoursite.com/2019/05/02/文件系统读写流程/1.png">
+<meta property="og:image" content="http://yoursite.com/2019/05/02/文件系统读写流程/3.png">
+<meta property="og:image" content="http://yoursite.com/2019/05/02/文件系统读写流程/4.jpg">
+<meta property="og:updated_time" content="2019-05-03T12:40:26.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="文件系统读写流程">
+<meta name="twitter:description" content="掌握文件系统的读写流程和具体涉及到的知识点是理解分布式文件系统的重要途径，下文将主要描述文件系统read/write的基本流程，并介绍其中涉及的一些关键角色。">
+<meta name="twitter:image" content="http://yoursite.com/2019/05/02/文件系统读写流程/2.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'upsuperman'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/05/02/文件系统读写流程/">
+
+
+
+
+
+  <title>文件系统读写流程 | upsuperman</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">upsuperman</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一蓑烟雨任平生</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/05/02/文件系统读写流程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Up">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="upsuperman">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">文件系统读写流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-05-02T10:46:07+08:00">
+                2019-05-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 阅读数
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  4.2k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  15
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>掌握文件系统的读写流程和具体涉及到的知识点是理解分布式文件系统的重要途径，下文将主要描述文件系统read/write的基本流程，并介绍其中涉及的一些关键角色。<a id="more"></a></p>
+<h1 id="一-基本概念"><a href="#一-基本概念" class="headerlink" title="一. 基本概念"></a>一. 基本概念</h1><h2 id="1-虚拟文件系统，-Virtual-file-system，VFS）"><a href="#1-虚拟文件系统，-Virtual-file-system，VFS）" class="headerlink" title="1. 虚拟文件系统，(Virtual file system，VFS）"></a>1. 虚拟文件系统，(Virtual file system，VFS）</h2><p>VFS是操作系统中文件系统虚拟层，定义了一个通用文件系统的接口层和适配层，一方面为用户进程提供了一组统一的访问文件，目录和其他对象的统一方法，另一方面又要和不同的底层文件系统进行适配。<br><img src="/2019/05/02/文件系统读写流程/2.png" alt="vfs"></p>
+<p>VFS主要有四个对象类型：<br>（1）superblock<br>（2）inode<br>（3）dentry<br>（4）file </p>
+<h3 id="Superblock"><a href="#Superblock" class="headerlink" title="Superblock"></a>Superblock</h3><p>超级块（spuerblock）对象由各自的文件系统实现，用来存储文件系统的信息。这是整个文件系统的第一块空间。包括整个文件系统的基本信息，如块大小，inode/block的总量、使用量、剩余量，指向空间 inode 和数据块的指针等相关信息。</p>
+<h3 id="inode"><a href="#inode" class="headerlink" title="inode"></a>inode</h3><p>inode块(文件索引节点) : 记录文件的属性。它是文件系统的最基本单元，是文件系统连接任何子目录、任何文件的桥梁。每个子目录和文件只有唯一的一个 inode 块。它包含了文件系统中文件的基本属性(文件的长度、创建及修改时间、权限、所属关系)、存放数据的位置等相关信息。在 Linux 下可以通过 “ls -li” 命令查看文件的 inode 信息。硬连接和源文件具有相同的inode。<br>inode具体包含以下内容：<br><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">文件的字节数</span><br><span class="line">文件拥有者的<span class="keyword">User</span> <span class="title">ID</span></span><br><span class="line">文件的<span class="keyword">Group</span> <span class="title">ID</span></span><br><span class="line">文件的读、写、执行权限</span><br><span class="line">文件的时间戳，共有三个：ctime指inode上一次变动的时间，mtime指文件内容上一次变动的时间，atime指文件上一次打开的时间。</span><br><span class="line">链接数，即有多少文件名指向这个inode</span><br><span class="line">文件数据block的位置</span><br></pre></td></tr></table></figure></p>
+<p>inode是内核文件对象的元数据，其不包括文件的数据和文件名等信息，只包含数据块的位置等信息，数据结构相对稳定，可以固定大小，进而可以实现将整个文件系统中的inode按照一定的组织方式来集中存储在inodTable中，文件系统加载时，可以方便查找。</p>
+<p>inode仅仅只是保存了文件对象的属性信息，并没有包含文件名，文件在文件系统的目录树中所处的位置信息。那么内核又是怎么管理文件系统的目录树呢？</p>
+<h3 id="dentry"><a href="#dentry" class="headerlink" title="dentry"></a>dentry</h3><p>dentry: 管理路径的目录项。比如一个路径 /home/foo/hello.txt，那么目录项有home, foo, hello.txt，目<br>录项存储的是这个目录下的所有的文件的inode号和文件名等信息。其内部是树形结构，操作系统检索一个文件，都是从根目录开始，按层次解析路径中的所有目录，直到定位到文件。<br>结构体的定义：<br><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"> &#123;   </span><br><span class="line">atomic_td_count<span class="comment">;目录项对象使用计数器</span></span><br><span class="line">unsignedintd_flags<span class="comment">;目录项标志</span></span><br><span class="line">structinode*d_inode<span class="comment">;与文件名关联的索引节点</span></span><br><span class="line">structdentry*d_parent<span class="comment">;父目录的目录项对象</span></span><br><span class="line">structlist_headd_hash<span class="comment">;散列表表项的指针</span></span><br><span class="line">structlist_headd_lru<span class="comment">;未使用链表的指针</span></span><br><span class="line">structlist_headd_child<span class="comment">;父目录中目录项对象的链表的指针</span></span><br><span class="line">structlist_headd_subdirs<span class="comment">;对目录而言，表示子目录目录项对象的链表</span></span><br><span class="line">structlist_headd_alias<span class="comment">;相关索引节点（别名）的链表</span></span><br><span class="line">intd_mounted<span class="comment">;对于安装点而言，表示被安装文件系统根项</span></span><br><span class="line">structqstrd_name<span class="comment">;文件名</span></span><br><span class="line">unsignedlongd_time<span class="comment">;/*usedbyd_revalidate*/</span></span><br><span class="line">structdentry_operations*d_op<span class="comment">;目录项方法</span></span><br><span class="line">structsuper_block*d_sb<span class="comment">;文件的超级块对象</span></span><br><span class="line">vunsignedlongd_vfs_flags<span class="comment">;</span></span><br><span class="line">void*d_fsdata<span class="comment">;与文件系统相关的数据</span></span><br><span class="line">unsignedchard_iname[DNAME_INLINE_LEN]<span class="comment">;存放短文件名&#125;;</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="File"><a href="#File" class="headerlink" title="File"></a>File</h3><p>VFS最后一个主要对象是文件，表示进程已打开的文件。如果我们站在userSpace的角度考虑VFS，file会首先进入我们的视野。进程直接处理的是文件，而不是超级块、inode或dentry。file包含我们非常熟悉的信息（如访问模式、当前偏移等），同样道理，文件操作和我们非常熟悉的系统调用read()和write()等也一样。</p>
+<h2 id="2-file-struct、文件描述符和fs-struct"><a href="#2-file-struct、文件描述符和fs-struct" class="headerlink" title="2. file_struct、文件描述符和fs_struct"></a>2. file_struct、文件描述符和fs_struct</h2><h3 id="file-struct"><a href="#file-struct" class="headerlink" title="file_struct"></a>file_struct</h3><p>系统的每一个进程维护了自己所有打开的文件，结构体file_struct、fs_struct把VFS和系统进程联系在一起，其中file_struct描述了进程与文件相关的信息，结构体包含一个fd_array的数组指针，文件描述符fd(file descriptors)就是该数组的索引，进程通过fd来访问文件，files_struct结构在include/linux/sched.h中定义如下：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">files_struct</span> &#123;</span></span><br><span class="line"><span class="keyword">atomic_t</span> count; <span class="comment">/* 共享该表的进程数 */</span>  </span><br><span class="line"><span class="keyword">rwlock_t</span> file_lock; <span class="comment">/* 保护以下的所有域,以免在tsk-&gt;alloc_lock中嵌套*/</span></span><br><span class="line"><span class="keyword">int</span> max_fds; <span class="comment">/*当前文件对象的最大数*/</span></span><br><span class="line"><span class="keyword">int</span> max_fdset; <span class="comment">/*当前文件描述符的最大数*/</span></span><br><span class="line"><span class="keyword">int</span> next_fd; <span class="comment">/*已分配的文件描述符加1*/</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">file</span> ** <span class="title">fd</span>;</span> <span class="comment">/* 指向文件对象指针数组的指针 */</span></span><br><span class="line">fd_set *close_on_exec; <span class="comment">/*指向执行exec( )时需要关闭的文件描述符*/</span>   </span><br><span class="line">fd_set *open_fds; <span class="comment">/*指向打开文件描述符的指针*/</span></span><br><span class="line">fd_set close_on_exec_init;<span class="comment">/* 执行exec( )时需要关闭的文件描述符的初 值集合*/</span>  </span><br><span class="line">fd_set open_fds_init; <span class="comment">/*文件描述符的初值集合*/</span>   </span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">file</span> * <span class="title">fd_array</span>[32];</span><span class="comment">/* 文件对象指针的初始化数组*/</span>  </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>fd指针指向文件对象的指针数组。该数组的长度存放在max_fds中。通常，fd指针指向files_struct结构的fd_array指针数组，该数组包括32个文件对象指针。如果进程打开的文件数目多于32，内核就分配一个新的、更大的文件指针数组，并将其地址存放在fd指针中；内核同时也更新max_fds域的值。<br><img src="/2019/05/02/文件系统读写流程/1.png" alt="file_struct"></p>
+<h3 id="文件描述符"><a href="#文件描述符" class="headerlink" title="文件描述符"></a>文件描述符</h3><p>文件描述符fd：对于操作系统内核来说，每个打开的文件都有一个文件描述符，其是一个正整数，只在每个进程内有效，对于不同的进程可以有相同的fd。</p>
+<h3 id="fs-struct"><a href="#fs-struct" class="headerlink" title="fs_struct"></a>fs_struct</h3><p>fs_struct描述了文件系统和进程相关的信息，结构体中包含当前进程的工作目录和根目录。linux内核2.4版本后，定义在include/linux/fs_struct.h中:<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">fs_struct</span> &#123;</span>  </span><br><span class="line"><span class="keyword">atomic_t</span> count;   </span><br><span class="line"><span class="keyword">rwlock_t</span> lock;  </span><br><span class="line"><span class="keyword">int</span> umask;   </span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dentry</span> * <span class="title">root</span>, * <span class="title">pwd</span>, * <span class="title">altroot</span>;</span> </span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">vfsmount</span> * <span class="title">rootmnt</span>, * <span class="title">pwdmnt</span>, * <span class="title">altrootmnt</span>;</span>   </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>count表示共享同一 fs_struct 表的进程数目。umask由umask()系统调用使用，用于为新创建的文件设置初始文件许可权。<br>fs_struct中的dentry结构是对一个目录项的描述，root、pwd 及 altroot 三个指针都指向这个结构。其中root所指向的dentry结构代表着本进程所在的根目录，也就是在用户登录进入系统时所看到的根目录；pwd指向进程当前所在的目录；而altroot则是为用户设置的替换根目录。实际运行时，这三个目录不一定都在同一个文件系统中。例如，进程的根目录通常是安装于“／”节点上的Ext2文件系统，而当前工作目录可能是安装于/msdos的一个DOS文件系统。因此，fs_struct结构中的rootmnt、 pwdmnt及 altrootmnt就是对那三个目录的挂载点的描述，挂载点的数据结构为vfsmount。</p>
+<h1 id="二-系统调用和缓冲"><a href="#二-系统调用和缓冲" class="headerlink" title="二. 系统调用和缓冲"></a>二. 系统调用和缓冲</h1><h2 id="1-系统调用"><a href="#1-系统调用" class="headerlink" title="1. 系统调用"></a>1. 系统调用</h2><p>操作系统的主要功能是为管理硬件资源和为应用程序开发人员提供良好的环境，但是计算机系统的各种硬件资源是有限的，因此为了保证每一个进程都能安全的执行。处理器设有两种模式：“用户模式”与“内核模式”。一些容易发生安全问题的操作都被限制在只有内核模式下才可以执行，例如I/O操作，修改基址寄存器内容等。而连接用户模式和内核模式的接口称之为系统调用。</p>
+<p>应用程序代码运行在用户模式下，当应用程序需要实现内核模式下的指令时，先向操作系统发送调用请求。操作系统收到请求后，执行系统调用接口，使处理器进入内核模式。当处理器处理完系统调用操作后，操作系统会让处理器返回用户模式，继续执行用户代码。</p>
+<p>进程的虚拟地址空间可分为两部分，内核空间和用户空间。内核空间中存放的是内核代码和数据，而进程的用户空间中存放的是用户程序的代码和数据。不管是内核空间还是用户空间，它们都处于虚拟空间中，都是对物理地址的映射。</p>
+<p>应用程序中实现对文件的操作过程就是典型的系统调用过程。基本IO系统函数可以使用Linux man查看，最基本的比如:</p>
+<ul>
+<li>open(): 用来打开或创建一个文件，其行为可以通过参数控制，详细可<code>man 2 open</code>来查看，open返回的文件描述符是当前没有使用过的最小的描述符值。默认下，进程启动时，0,1,2分别表示标准输入流，标准输出流和标准错误流。</li>
+<li>read()： <code>ssize_t read(int fildes, void *buf, size_t nbyte);</code>其返回值有多重情况，详细查看man，read()方法有可能因为网络数据未到达或磁盘正在读取而被阻塞。</li>
+<li>wirte():<code>ssize_t write(int fildes, const void *buf, size_t nbyte);</code>默认下write也是一个同步方法，但只要写入文件系统或socket就会返回，不是等待数据真正写入磁盘。</li>
+</ul>
+<h2 id="2-I-O缓冲区"><a href="#2-I-O缓冲区" class="headerlink" title="2. I/O缓冲区"></a>2. I/O缓冲区</h2><p>Buffer和Cache<br>buffer和cache是两个不同的概念：cache是高速缓存，用于CPU和内存之间的缓冲；buffer是I/O缓存，用于内存和硬盘的缓冲；简单的说，cache是加速“读”，而buffer是缓冲“写”，前者解决读的问题，保存从磁盘上读出的数据，后者是解决写的问题，保存即将要写入到磁盘上的数据。</p>
+<h3 id="2-1-Buffer-Cache和-Page-Cache"><a href="#2-1-Buffer-Cache和-Page-Cache" class="headerlink" title="2.1 Buffer Cache和 Page Cache"></a>2.1 Buffer Cache和 Page Cache</h3><p>buffer cache和 page cache 都是为了处理设备和内存交互时高速访问的问题。buffer cache可称为块缓冲器，page cache可称为页缓冲器。在linux不支持虚拟内存机制之前，还没有页的概念，因此缓冲区以块为单位对设备进行。在linux采用虚拟内存的机制来管理内存后，页是虚拟内存管理的最小单位，开始采用页缓冲的机制来缓冲内存。Linux2.6之后内核将这两个缓存整合，页和块可以相互映射，同时，页缓存page cache面向的是虚拟内存，块I/O缓存Buffer cache是面向块设备。需要强调的是，页缓存和块缓存对进程来说就是一个存储系统，进程不需要关注底层的设备的读写。</p>
+<p>buffer cache和page cache两者最大的区别是缓存的粒度。buffer cache面向的是文件系统的块。而内核的内存管理组件采用了比文件系统的块更高级别的抽象：页page，其处理的性能更高。因此和内存管理交互的缓存组件，都使用页缓存。</p>
+<h3 id="2-2-页缓存Page-Cache"><a href="#2-2-页缓存Page-Cache" class="headerlink" title="2.2 页缓存Page Cache"></a>2.2 页缓存Page Cache</h3><p>页缓存是面向文件，面向内存的。通俗来说，它位于内存和文件之间缓冲区，文件IO操作实际上只和page cache交互，不直接和内存交互。page cache可以用在所有以文件为单元的场景下，比如网络文件系统等等。page cache通过一系列的数据结构，比如inode, address_space, struct page，实现将一个文件映射到页的级别：</p>
+<p>struct page结构标志一个物理内存页，通过page + offset就可以将此页帧定位到一个文件中的具体位置。同时struct page还有以下重要参数：</p>
+<ul>
+<li>标志位flags来记录该页是否是脏页，是否正在被写回等等；</li>
+<li>mapping指向了地址空间address_space，表示这个页是一个页缓存中页，和一个文件的地址空间对应；</li>
+<li>index记录这个页在文件中的页偏移量；</li>
+<li>文件系统的inode实际维护了这个文件所有的块block的块号，通过对文件偏移量offset取模可以很快定位到这个偏移量所在的文件系统的块号，磁盘的扇区号。同样，通过对文件偏移量offset进行取模可以计算出偏移量所在的页的偏移量。</li>
+</ul>
+<p>page cache缓存组件抽象了地址空间address_space这个概念来作为文件系统和页缓存的中间桥梁。地址空间address_space通过指针可以方便的获取文件inode和struct page的信息，所以可以很方便地定位到一个文件的offset在各个组件中的位置，即通过：文件字节偏移量 –&gt; 页偏移量 –&gt; 文件系统块号 block –&gt; 磁盘扇区号</p>
+<p>页缓存实际上就是采用了一个基数树结构将一个文件的内容组织起来存放在物理内存struct page中。一个文件inode对应一个地址空间address_space。而一个address_space对应一个页缓存基数树。<br><img src="/2019/05/02/文件系统读写流程/3.png" alt="page_cache"></p>
+<h2 id="3-Address-Space"><a href="#3-Address-Space" class="headerlink" title="3. Address Space"></a>3. Address Space</h2><p>读写时通过address_space接触磁盘： 在open文件之后进行read/write时，读写操作并不是直接跟硬盘交互，而是会经过address_space。每个inode有自己的一个address_space（inode的i_mapping字段），address_space中的address_space_operations（如readpage/writepage/readpages/writepages等）才会跟磁盘打交道进行读写。</p>
+<p>address_space是一个基数树（redix tree），它记录inode的内容在page cache中是否命中：</p>
+<ul>
+<li>在读写文件的时候，先会去查是否在page cache中命中，如果在page cache中命中就不用去读写磁盘了。</li>
+<li>如果没在page cache中，就会通过address_space_operations去读写磁盘并添加到这个inode的address_space中，这样方便管理且减少和磁盘交互次数。</li>
+</ul>
+<p>也就是说，page cache和address_space可认为是同一个东西，这里面可能有脏页，drop_cache和脏页回写都是去找address_space。每个打开的文件的inode都有其redix树存放它们各自的address_space（也就是它们产生的page cache）。块设备本身也是一个文件（你也可以打开/dev/sda来读写裸设备）。</p>
+<h1 id="三-读写文件的流程"><a href="#三-读写文件的流程" class="headerlink" title="三. 读写文件的流程"></a>三. 读写文件的流程</h1><h2 id="1-读文件基本流程"><a href="#1-读文件基本流程" class="headerlink" title="1. 读文件基本流程"></a>1. 读文件基本流程</h2><ol>
+<li>进程调用库函数向内核发起读文件请求；</li>
+<li>内核通过检查进程的文件描述符定位到虚拟文件系统的已打开文件列表表项；</li>
+<li>调用该文件可用的系统调用函数read()；</li>
+<li>read()函数通过文件表项链接到dentry，如果两个进程打开同一个文件，那它们的file就指向同一个dentry，根据传入的文件路径，在dentry中检索，找到该文件的inode；</li>
+<li>在inode中，通过文件内容偏移量计算出要读取的页；</li>
+<li>通过inode找到文件对应的address_space；</li>
+<li>在address_space中访问该文件的页缓存树，查找对应的页缓存结点：   <ul>
+<li>如果页缓存命中，那么直接返回文件内容；</li>
+<li>如果页缓存缺失，那么产生一个页缺失异常，创建一个页缓存页，同时通过inode找到文件该页的磁盘地址，读取相应的页填充该缓存页；重新进行第6步查找页缓存；</li>
+</ul>
+</li>
+<li>文件内容读取成功。</li>
+</ol>
+<p>大体的流程如下：<br><img src="/2019/05/02/文件系统读写流程/4.jpg" alt="read_wtite"></p>
+<h2 id="2-写文件基本流程"><a href="#2-写文件基本流程" class="headerlink" title="2. 写文件基本流程"></a>2. 写文件基本流程</h2><p>前6步和读文件一致，在address_space中查询对应页的页缓存是否存在：</p>
+<ol start="7">
+<li>如果页缓存命中，直接把文件内容修改更新在页缓存的页中。写文件就结束了。这时候文件修改位于页缓存，并没有写回到磁盘文件中去。</li>
+<li>如果页缓存缺失，那么产生一个页缺失异常，创建一个页缓存页，同时通过inode找到文件该页的磁盘地址，读取相应的页填充该缓存页。此时缓存页命中，进行第6步。</li>
+<li>一个页缓存中的页如果被修改，那么会被标记成脏页。脏页需要写回到磁盘中的文件块。有两种方式可以把脏页写回磁盘：<ul>
+<li>手动调用sync()或者fsync()系统调用把脏页写回</li>
+<li>pdflush进程会定时把脏页写回到磁盘<br>同时注意，脏页不能被置换出内存，如果脏页正在被写回，那么会被设置写回标记，这时候该页就被上锁，其他写请求被阻塞直到锁释放。</li>
+</ul>
+</li>
+</ol>
+<h1 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h1><ul>
+<li><a href="https://blog.csdn.net/Frecon/article/details/80153535" target="_blank" rel="noopener">Linux IO 学习笔记（二）——文件系统读写文件的流程</a></li>
+<li><a href="https://www.cnblogs.com/huxiao-tee/p/4657851.html" target="_blank" rel="noopener">从内核文件系统看文件读写过程</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/文件系统，read-write/" rel="tag"># 文件系统，read/write</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/05/浅谈分布式系统的CAP理论/" rel="next" title="浅谈分布式系统的CAP理论">
+                <i class="fa fa-chevron-left"></i> 浅谈分布式系统的CAP理论
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/head.jpg" alt="Up">
+            
+              <p class="site-author-name" itemprop="name">Up</p>
+              <p class="site-description motion-element" itemprop="description">后端开发程序猿</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/upsuperman" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:526050496@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一-基本概念"><span class="nav-number">1.</span> <span class="nav-text">一. 基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-虚拟文件系统，-Virtual-file-system，VFS）"><span class="nav-number">1.1.</span> <span class="nav-text">1. 虚拟文件系统，(Virtual file system，VFS）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Superblock"><span class="nav-number">1.1.1.</span> <span class="nav-text">Superblock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#inode"><span class="nav-number">1.1.2.</span> <span class="nav-text">inode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dentry"><span class="nav-number">1.1.3.</span> <span class="nav-text">dentry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#File"><span class="nav-number">1.1.4.</span> <span class="nav-text">File</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-file-struct、文件描述符和fs-struct"><span class="nav-number">1.2.</span> <span class="nav-text">2. file_struct、文件描述符和fs_struct</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#file-struct"><span class="nav-number">1.2.1.</span> <span class="nav-text">file_struct</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文件描述符"><span class="nav-number">1.2.2.</span> <span class="nav-text">文件描述符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fs-struct"><span class="nav-number">1.2.3.</span> <span class="nav-text">fs_struct</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二-系统调用和缓冲"><span class="nav-number">2.</span> <span class="nav-text">二. 系统调用和缓冲</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-系统调用"><span class="nav-number">2.1.</span> <span class="nav-text">1. 系统调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-I-O缓冲区"><span class="nav-number">2.2.</span> <span class="nav-text">2. I/O缓冲区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Buffer-Cache和-Page-Cache"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.1 Buffer Cache和 Page Cache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-页缓存Page-Cache"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2 页缓存Page Cache</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Address-Space"><span class="nav-number">2.3.</span> <span class="nav-text">3. Address Space</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三-读写文件的流程"><span class="nav-number">3.</span> <span class="nav-text">三. 读写文件的流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-读文件基本流程"><span class="nav-number">3.1.</span> <span class="nav-text">1. 读文件基本流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-写文件基本流程"><span class="nav-number">3.2.</span> <span class="nav-text">2. 写文件基本流程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文章"><span class="nav-number">4.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Up</span>
+
+
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">7k</span>
+  
+</div>
+
+
+
+<!--	
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+-->
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+    <span class="site-pv">
+      总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
